@@ -1,6 +1,5 @@
-import React, { memo, useCallback, useMemo, useState } from "react";
-
-import { useBoundingClientRect } from "@/hooks/use-bounding-client-rect";
+import React, { memo, useCallback, useMemo } from "react";
+import useResizeObserver from "use-resize-observer";
 
 import { ColorService, type IColor } from "@/services/color";
 
@@ -13,9 +12,7 @@ interface ISaturationProps {
 }
 
 export const Saturation = memo(({ height, color, onChange }: ISaturationProps) => {
-  const [saturationRef, setSaturationRef] = useState<HTMLDivElement | null>(null);
-
-  const { width } = useBoundingClientRect(saturationRef);
+  const { ref: saturationRef, width = 1 } = useResizeObserver();
 
   const position = useMemo(() => {
     const x = (color.hsv.s / 100) * width;
@@ -42,7 +39,7 @@ export const Saturation = memo(({ height, color, onChange }: ISaturationProps) =
 
   return (
     <Interactive onCoordinateChange={updateColor}>
-      <div ref={setSaturationRef} style={{ height, backgroundColor: `hsl(${hsl})` }} className="rcp-saturation">
+      <div ref={saturationRef} style={{ height, backgroundColor: `hsl(${hsl})` }} className="rcp-saturation">
         <div
           style={{ left: position.x, top: position.y, backgroundColor: `rgb(${rgb})` }}
           className="rcp-saturation-cursor"

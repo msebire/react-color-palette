@@ -1,6 +1,5 @@
-import React, { memo, useCallback, useState } from "react";
-
-import { useBoundingClientRect } from "@/hooks/use-bounding-client-rect";
+import React, { memo, useCallback, useRef } from "react";
+import useResizeObserver from "use-resize-observer";
 
 import { clamp } from "@/utils/clamp";
 
@@ -10,18 +9,20 @@ interface IInteractiveProps {
 }
 
 export const Interactive = memo(({ onCoordinateChange, children }: IInteractiveProps) => {
-  const [interactiveRef, setInteractiveRef] = useState<HTMLDivElement | null>(null);
+  const interactiveRef = useRef<HTMLDivElement | null>(null);
 
-  const { width, height, left, top } = useBoundingClientRect(interactiveRef);
+  const { width = 1, height = 1 } = useResizeObserver({ ref: interactiveRef });
 
   const move = useCallback(
     (event: React.PointerEvent<HTMLDivElement> | PointerEvent) => {
-      const x = clamp(event.clientX - left, 0, width);
-      const y = clamp(event.clientY - top, 0, height);
+      let ir = interactiveRef.current?.getBoundingClientRect();
+
+      const x = clamp(event.pageX - (ir?.left ?? 0), 0, width);
+      const y = clamp(event.pageY - (ir?.top ?? 0), 0, height);
 
       onCoordinateChange(x, y);
     },
-    [width, height, left, top, onCoordinateChange]
+    [interactiveRef, width, height, onCoordinateChange]
   );
 
   const onPointerDown = useCallback(
@@ -48,7 +49,7 @@ export const Interactive = memo(({ onCoordinateChange, children }: IInteractiveP
   );
 
   return (
-    <div ref={setInteractiveRef} className="rcp-interactive" onPointerDown={onPointerDown}>
+    <div ref={interactiveRef} className="rcp-interactive" onPointerDown={onPointerDown}>
       {children}
     </div>
   );
