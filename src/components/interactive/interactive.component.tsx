@@ -10,16 +10,17 @@ interface IInteractiveProps {
 }
 
 export const Interactive = memo(({ onCoordinateChange, children }: IInteractiveProps) => {
-  const [interactiveRef, { width = 1, height = 1, left = 1, top = 1 }] = useBoundingClientRect<HTMLDivElement>();
+  const [interactiveRef, { width = 1, height = 1 }] = useBoundingClientRect<HTMLDivElement>();
 
   const move = useCallback(
     (event: React.PointerEvent<HTMLDivElement> | PointerEvent) => {
+      const { left = 1, top = 1 } = interactiveRef.current?.getBoundingClientRect() ?? {};
       const x = clamp(event.clientX - left, 0, width);
       const y = clamp(event.clientY - top, 0, height);
 
       onCoordinateChange(x, y);
     },
-    [width, height, left, top, onCoordinateChange]
+    [interactiveRef, width, height, onCoordinateChange]
   );
 
   const onPointerDown = useCallback(

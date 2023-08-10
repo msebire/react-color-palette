@@ -1,6 +1,9 @@
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 
-export function useBoundingClientRect<T extends HTMLElement>(): [React.RefObject<T>, DOMRect] {
+export function useBoundingClientRect<T extends HTMLElement>(): [
+  React.RefObject<T>,
+  { height: number | undefined; width: number | undefined },
+] {
   const ref = useRef<T>(null);
 
   const [resizeCounter, setResizeCounter] = useState(0);
@@ -21,9 +24,9 @@ export function useBoundingClientRect<T extends HTMLElement>(): [React.RefObject
   }, [onResize]);
 
   return useMemo(() => {
-    const domRect = ref.current?.getBoundingClientRect() ?? ({} as DOMRect);
+    let boundingClientRect = ref.current?.getBoundingClientRect();
 
-    return [ref, domRect];
+    return [ref, { height: boundingClientRect?.height, width: boundingClientRect?.width }];
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resizeCounter]);
 }
